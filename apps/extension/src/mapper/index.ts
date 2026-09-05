@@ -130,7 +130,8 @@ export class DeterministicMapper {
     aria: string,
     type: string
   ): FieldClassificationType {
-    const tokens = [name, id, placeholder, label, aria, unifiedText];
+    const directTokens = [name, id, placeholder, label, aria];
+    const tokens = [...directTokens, unifiedText];
 
     // Check HTML input types first
     if (type === 'email') return 'email';
@@ -141,7 +142,7 @@ export class DeterministicMapper {
 
     // First Name / Given Name
     if (
-      this.matchesAny(tokens, [
+      this.matchesAny(directTokens, [
         /^first[_\-\s]?name$/i,
         /^fname$/i,
         /^given[_\-\s]?name$/i,
@@ -155,7 +156,7 @@ export class DeterministicMapper {
 
     // Last Name / Surname / Family Name
     if (
-      this.matchesAny(tokens, [
+      this.matchesAny(directTokens, [
         /^last[_\-\s]?name$/i,
         /^lname$/i,
         /^surname$/i,
@@ -170,7 +171,7 @@ export class DeterministicMapper {
 
     // Full Name
     if (
-      this.matchesAny(tokens, [
+      this.matchesAny(directTokens, [
         /^full[_\-\s]?name$/i,
         /^fullname$/i,
         /^name$/i,
@@ -179,7 +180,7 @@ export class DeterministicMapper {
         /\bcandidate\s*name\b/i,
         /\bapplicant\s*name\b/i,
       ]) &&
-      !tokens.some((t) => /first|last|company|user|file/i.test(t))
+      !directTokens.some((t) => /first|last|company|user|file/i.test(t))
     ) {
       return 'full_name';
     }

@@ -77,17 +77,22 @@ export class FormFiller {
     const byId = doc.getElementById(rawId);
     if (byId) return byId;
 
-    // 2. Direct name lookup
-    const byName = doc.querySelector(`[name="${rawId}"]`);
-    if (byName) return byName as HTMLElement;
+    // 2. Exact name lookup without interpolating arbitrary page-controlled text into CSS.
+    const byName = Array.from(doc.querySelectorAll<HTMLElement>('[name]')).find(
+      (element) => element.getAttribute('name') === rawId
+    );
+    if (byName) return byName;
 
     // 3. Exact fieldId attribute lookup if stored
     const byAttr = doc.querySelector(`[data-field-id="${fieldId}"]`);
     if (byAttr) return byAttr as HTMLElement;
 
-    // 4. Case-insensitive name attribute lookup
-    const byNameInsensitive = doc.querySelector(`[name="${rawId}" i]`);
-    if (byNameInsensitive) return byNameInsensitive as HTMLElement;
+    // 4. Case-insensitive name fallback for forms that change casing between scan and fill.
+    const lowerRawId = rawId.toLowerCase();
+    const byNameInsensitive = Array.from(doc.querySelectorAll<HTMLElement>('[name]')).find(
+      (element) => element.getAttribute('name')?.toLowerCase() === lowerRawId
+    );
+    if (byNameInsensitive) return byNameInsensitive;
 
     return null;
   }

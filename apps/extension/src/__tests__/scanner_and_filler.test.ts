@@ -125,4 +125,20 @@ describe('DOMScanner and DeterministicMapper Integration', () => {
     expect(input.value).toBe('test@example.com');
     expect(success).toBe(true);
   });
+
+  it('keeps fields with distinct names mapped to distinct elements', () => {
+    const elements = [
+      new MockElement('input', { name: 'first_name', type: 'text' }),
+      new MockElement('input', { name: 'last_name', type: 'text' }),
+      new MockElement('textarea', { name: 'interest' }),
+    ];
+    const doc = {
+      getElementById: () => null,
+      querySelectorAll: () => elements,
+      querySelector: () => null,
+    } as any;
+
+    expect(defaultFiller.findElement('field-last_name', doc)).toBe(elements[1]);
+    expect(defaultFiller.findElement('field-interest', doc)).toBe(elements[2]);
+  });
 });

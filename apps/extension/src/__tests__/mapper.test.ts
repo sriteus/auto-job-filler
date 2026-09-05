@@ -130,4 +130,27 @@ describe('DeterministicMapper', () => {
       value: 'https://linkedin.com/in/sarthakgupta',
     });
   });
+
+  it('does not reuse first name for last name or unrelated free text fields', () => {
+    const plan = defaultMapper.mapFields([
+      {
+        fieldId: 'field-first_name', tag: 'input', type: 'text', name: 'first_name',
+        label: 'First name', required: true, visible: true, domOrder: 1,
+      },
+      {
+        fieldId: 'field-last_name', tag: 'input', type: 'text', name: 'last_name',
+        label: 'Last name', nearbyText: 'First name', required: true, visible: true, domOrder: 2,
+      },
+      {
+        fieldId: 'field-interest', tag: 'textarea', type: '', name: 'interest',
+        label: 'Why are you interested?', nearbyText: 'First name', required: false, visible: true, domOrder: 3,
+      },
+    ], profile);
+
+    expect(plan.entries).toMatchObject([
+      { classification: 'first_name', value: 'Sarthak' },
+      { classification: 'last_name', value: 'Gupta' },
+      { classification: 'unknown', action: 'skip' },
+    ]);
+  });
 });
