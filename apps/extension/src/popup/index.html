@@ -3,283 +3,74 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AI Job Application Agent</title>
+    <title>Auto Job Filler</title>
     <style>
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-      body {
-        width: 360px;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        font-size: 14px;
-        line-height: 1.5;
-        color: #1f1f1f;
-        background: #fff;
-      }
-      .container {
-        padding: 16px;
-      }
-      .header {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 16px;
-        padding-bottom: 16px;
-        border-bottom: 1px solid #e8e8e8;
-      }
-      .logo {
-        width: 32px;
-        height: 32px;
-        background: #1890ff;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: bold;
-        font-size: 16px;
-      }
-      .title {
-        font-size: 16px;
-        font-weight: 600;
-      }
-      .subtitle {
-        font-size: 12px;
-        color: #8c8c8c;
-      }
-      .status {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 12px;
-        background: #f5f5f5;
-        border-radius: 8px;
-        margin-bottom: 16px;
-      }
-      .status-indicator {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: #8c8c8c;
-      }
-      .status-indicator.connected {
-        background: #52c41a;
-      }
-      .status-indicator.scanning {
-        background: #faad14;
-        animation: pulse 1.5s infinite;
-      }
-      @keyframes pulse {
-        0%,
-        100% {
-          opacity: 1;
-        }
-        50% {
-          opacity: 0.5;
-        }
-      }
-      .status-text {
-        font-size: 13px;
-        color: #595959;
-      }
-      .btn {
-        width: 100%;
-        padding: 10px 16px;
-        border: none;
-        border-radius: 6px;
-        font-size: 14px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-      }
-      .btn-primary {
-        background: #1890ff;
-        color: white;
-      }
-      .btn-primary:hover {
-        background: #40a9ff;
-      }
-      .btn-primary:disabled {
-        background: #d9d9d9;
-        cursor: not-allowed;
-      }
-      .btn-secondary {
-        background: #f5f5f5;
-        color: #1f1f1f;
-        border: 1px solid #d9d9d9;
-      }
-      .btn-secondary:hover {
-        background: #e8e8e8;
-      }
-      .btn-group {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        margin-bottom: 16px;
-      }
-      .divider {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin: 16px 0;
-        color: #bfbfbf;
-        font-size: 12px;
-      }
-      .divider::before,
-      .divider::after {
-        content: '';
-        flex: 1;
-        height: 1px;
-        background: #e8e8e8;
-      }
-      .info-section {
-        font-size: 12px;
-        color: #8c8c8c;
-      }
-      .info-item {
-        display: flex;
-        justify-content: space-between;
-        padding: 8px 0;
-        border-bottom: 1px solid #f0f0f0;
-      }
-      .info-label {
-        color: #bfbfbf;
-      }
-      .info-value {
-        color: #595959;
-        font-family: monospace;
-      }
-      .footer {
-        margin-top: 16px;
-        padding-top: 12px;
-        border-top: 1px solid #e8e8e8;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-      .version {
-        font-size: 11px;
-        color: #bfbfbf;
-      }
-      .links {
-        display: flex;
-        gap: 16px;
-      }
-      .links a {
-        font-size: 11px;
-        color: #1890ff;
-        text-decoration: none;
-      }
-      .links a:hover {
-        text-decoration: underline;
-      }
-      .hidden {
-        display: none !important;
-      }
-      .auth-panel {
-        display: grid;
-        gap: 8px;
-        padding: 12px;
-        background: #f5f5f5;
-        border-radius: 8px;
-        margin-bottom: 16px;
-      }
-      .auth-panel input {
-        width: 100%;
-        padding: 8px;
-        border: 1px solid #d9d9d9;
-        border-radius: 4px;
-      }
-      .auth-error {
-        color: #cf1322;
-        font-size: 12px;
-      }
-      .field-list {
-        max-height: 200px;
-        overflow-y: auto;
-        margin-top: 8px;
-      }
-      .field-item {
-        padding: 8px;
-        background: #fafafa;
-        border-radius: 4px;
-        margin-bottom: 4px;
-        font-size: 12px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-      .field-name {
-        color: #1f1f1f;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        max-width: 200px;
-      }
-      .field-type {
-        color: #8c8c8c;
-        font-family: monospace;
-        font-size: 11px;
-      }
-      .field-type.required::after {
-        content: ' *';
-        color: #ff4d4f;
-      }
+      :root { --ink: #17211b; --muted: #68756c; --paper: #f4f1e8; --panel: #fffdf7; --line: #d9ded3; --accent: #d95d39; --accent-dark: #a83d25; --ok: #668d68; }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { width: 380px; color: var(--ink); background: radial-gradient(circle at 100% 0, #dce9d6 0, transparent 15rem), var(--paper); font: 13px/1.45 Arial, sans-serif; }
+      .container { padding: 18px; }
+      .header { display: flex; align-items: center; gap: 11px; padding-bottom: 17px; border-bottom: 1px solid var(--line); }
+      .logo { width: 42px; height: 42px; padding: 4px; border-radius: 9px; background: var(--panel); border: 1px solid var(--line); box-shadow: 0 5px 14px #50604718; }
+      .logo img { display: block; width: 100%; height: 100%; object-fit: contain; }
+      .title { font: 700 18px/1.05 Georgia, serif; letter-spacing: -.02em; }
+      .subtitle { margin-top: 4px; color: var(--muted); font-size: 11px; }
+      .status { display: flex; align-items: center; gap: 8px; margin: 15px 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 5px; background: #fffdf7b8; }
+      .status-indicator { width: 8px; height: 8px; border-radius: 50%; background: #a8b0a8; }
+      .status-indicator.connected { background: var(--ok); box-shadow: 0 0 0 3px #668d6822; }
+      .status-indicator.scanning { background: #d49a31; animation: pulse 1.5s infinite; }
+      @keyframes pulse { 50% { opacity: .45; } }
+      .status-text { color: var(--muted); font-size: 12px; }
+      .auth-panel { display: grid; gap: 8px; margin-bottom: 15px; padding: 13px; border: 1px solid var(--line); border-radius: 5px; background: var(--panel); }
+      .auth-panel strong { font: 700 14px Georgia, serif; }
+      .auth-panel input { width: 100%; padding: 9px 10px; border: 1px solid var(--line); border-radius: 3px; background: #fffefb; color: var(--ink); outline: none; }
+      .auth-panel input:focus { border-color: var(--accent); }
+      .auth-error { color: var(--accent-dark); font-size: 11px; }
+      .btn-group { display: grid; gap: 8px; margin-bottom: 18px; }
+      .btn { width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px; padding: 11px 14px; border: 0; border-radius: 4px; cursor: pointer; font: 700 12px Arial, sans-serif; transition: background .18s, transform .18s; }
+      .btn:hover { transform: translateY(-1px); }
+      .btn-primary { background: var(--accent); color: white; }
+      .btn-primary:hover { background: var(--accent-dark); }
+      .btn-primary:disabled { background: #c6cbc4; cursor: not-allowed; transform: none; }
+      .btn-secondary { border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
+      .btn-secondary:hover { background: #eef1e9; }
+      .divider { display: flex; align-items: center; gap: 9px; margin: 0 0 9px; color: var(--muted); font: 700 10px Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; }
+      .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+      .field-list { max-height: 205px; overflow-y: auto; }
+      .info-section { padding: 18px 8px; color: var(--muted); text-align: center; font-size: 12px; }
+      .field-item { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 5px; padding: 9px 10px; border: 1px solid var(--line); border-left: 3px solid var(--ok); border-radius: 4px; background: var(--panel); font-size: 11px; }
+      .field-name { overflow: hidden; color: var(--ink); text-overflow: ellipsis; white-space: nowrap; }
+      .field-type { color: var(--ok); font: 700 10px Arial, sans-serif; white-space: nowrap; }
+      .footer { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); }
+      .version { color: var(--muted); font-size: 10px; }
+      .links { display: flex; gap: 14px; }
+      .links a { color: var(--accent-dark); font-size: 10px; text-decoration: none; }
+      .links a:hover { text-decoration: underline; }
+      .hidden { display: none !important; }
     </style>
   </head>
   <body>
-    <div class="container">
-      <div class="header">
-        <div class="logo">AI</div>
-        <div>
-          <div class="title">AI Job Application Agent</div>
-          <div class="subtitle">V1 - Project Foundation</div>
-        </div>
-      </div>
-
-      <div class="status" id="status">
-        <div class="status-indicator" id="statusIndicator"></div>
-        <div class="status-text" id="statusText">Ready to scan</div>
-      </div>
-
-      <div class="auth-panel" id="authPanel">
-        <strong>Connect your profile</strong>
-        <input id="authEmail" type="email" placeholder="Email" />
+    <main class="container">
+      <header class="header">
+        <div class="logo"><img src="../icons/app-logo-job-filler.svg" alt="Auto Job Filler logo" /></div>
+        <div><div class="title">Auto Job Filler</div><div class="subtitle">Personalized applications, less repetition.</div></div>
+      </header>
+      <div class="status" id="status"><div class="status-indicator" id="statusIndicator"></div><div class="status-text" id="statusText">Ready to scan</div></div>
+      <section class="auth-panel" id="authPanel">
+        <strong>Sync your profile</strong>
+        <input id="authEmail" type="email" placeholder="Email address" />
         <input id="authPassword" type="password" placeholder="Password" />
-        <button class="btn btn-secondary" id="authBtn">Sign in to Supabase</button>
+        <button class="btn btn-secondary" id="authBtn">Sign in to sync</button>
         <span class="auth-error" id="authError"></span>
-      </div>
-
+      </section>
       <div class="btn-group">
-        <button class="btn btn-primary" id="scanBtn"><span>🔍</span> Scan Page for Forms</button>
-        <button class="btn btn-primary hidden" id="fillBtn"><span>✨</span> Fill Form</button>
-        <button class="btn btn-secondary" id="openDashboardBtn">
-          <span>📊</span> Open Dashboard
-        </button>
+        <button class="btn btn-primary" id="scanBtn"><span>⌕</span> Scan application</button>
+        <button class="btn btn-primary hidden" id="fillBtn"><span>✦</span> Fill with my profile</button>
+        <button class="btn btn-secondary" id="openDashboardBtn"><span>↗</span> Open dashboard</button>
       </div>
-
-      <div class="divider">Detected Fields</div>
-
-      <div class="field-list" id="fieldList">
-        <div class="info-section" style="text-align: center; padding: 16px">
-          Click "Scan Page" to detect form fields
-        </div>
-      </div>
-
-      <div class="footer">
-        <span class="version">v1.0.0</span>
-        <div class="links">
-          <a href="#" id="settingsLink">Settings</a>
-          <a href="#" id="helpLink">Help</a>
-        </div>
-      </div>
-    </div>
+      <div class="divider">Detected fields</div>
+      <div class="field-list" id="fieldList"><div class="info-section">Scan this page to preview fields ready to fill.</div></div>
+      <footer class="footer"><span class="version">Auto Job Filler</span><div class="links"><a href="#" id="settingsLink">Settings</a><a href="#" id="helpLink">Help</a></div></footer>
+    </main>
     <script type="module" src="./index.ts"></script>
   </body>
 </html>

@@ -29,7 +29,7 @@ export default function HomePage() {
   return (
     <main className="shell">
       <header className="topbar">
-        <span className="brand">Job Agent</span>
+        <Link href="/" className="brand brand-mark"><img src="/app-logo-job-filler.svg" alt="Auto Job Filler logo" /> <span>Auto Job Filler</span></Link>
         <Link href="/login">Sign in</Link>
       </header>
       <section className="hero">

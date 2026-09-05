@@ -14,9 +14,7 @@ export const supabase = supabaseConfigured
 
 export async function signInAndLoadProfile(email: string, password: string) {
   if (!supabase)
-    throw new Error(
-      'Configure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to connect the extension.'
-    );
+      throw new Error('Profile sync is not configured for this extension build.');
   const { data: auth, error: authError } = await supabase.auth.signInWithPassword({
     email,
     password,

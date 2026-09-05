@@ -6,8 +6,8 @@ import { Providers } from './providers';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'AI Job Application Agent',
-  description: 'AI-powered job application assistant',
+  title: 'Auto Job Filler',
+  description: 'Personalized job applications with less repetition',
 };
 
 export default function RootLayout({

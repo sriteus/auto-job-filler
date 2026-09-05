@@ -52,6 +52,16 @@ textarea {
   max-width: 680px;
   padding: 42px 0 46px;
 }
+.brand-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.brand-mark img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
 .hero h1,
 .page-heading h1 {
   font-size: clamp(2.8rem, 8vw, 6rem);
