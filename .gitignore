@@ -48,3 +48,8 @@ prisma/migrations/*
 # Misc
 *.tsbuildinfo
 .eslintcache
+
+# Local tool and Supabase CLI state
+.claude/settings.local.json
+supabase/.temp/
+.vercel
