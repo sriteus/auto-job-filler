@@ -1,0 +1,133 @@
+import { defaultMapper } from '../mapper';
+import { DEFAULT_CANDIDATE_PROFILE } from '@ai-job-agent/shared';
+import type { ScannedField, CandidateProfile } from '@ai-job-agent/shared';
+
+describe('DeterministicMapper', () => {
+  const profile = DEFAULT_CANDIDATE_PROFILE as CandidateProfile;
+
+  it('maps personal fields accurately', () => {
+    const fields: ScannedField[] = [
+      {
+        fieldId: 'f1',
+        tag: 'input',
+        type: 'text',
+        name: 'firstName',
+        label: 'First name',
+        required: true,
+        visible: true,
+        domOrder: 1,
+      },
+      {
+        fieldId: 'f2',
+        tag: 'input',
+        type: 'text',
+        name: 'lastName',
+        label: 'Last name',
+        required: true,
+        visible: true,
+        domOrder: 2,
+      },
+      {
+        fieldId: 'f3',
+        tag: 'input',
+        type: 'email',
+        name: 'emailAddress',
+        label: 'Email address',
+        required: true,
+        visible: true,
+        domOrder: 3,
+      },
+      {
+        fieldId: 'f4',
+        tag: 'input',
+        type: 'tel',
+        name: 'phoneNumber',
+        label: 'Mobile phone number',
+        required: true,
+        visible: true,
+        domOrder: 4,
+      },
+    ];
+
+    const plan = defaultMapper.mapFields(fields, profile);
+
+    expect(plan.entries).toHaveLength(4);
+    expect(plan.entries[0]).toMatchObject({
+      fieldId: 'f1',
+      classification: 'first_name',
+      action: 'fill',
+      value: 'Sarthak',
+    });
+    expect(plan.entries[1]).toMatchObject({
+      fieldId: 'f2',
+      classification: 'last_name',
+      action: 'fill',
+      value: 'Gupta',
+    });
+    expect(plan.entries[2]).toMatchObject({
+      fieldId: 'f3',
+      classification: 'email',
+      action: 'fill',
+      value: 'sarthak@example.com',
+    });
+    expect(plan.entries[3]).toMatchObject({
+      fieldId: 'f4',
+      classification: 'phone',
+      action: 'fill',
+      value: '+1 (555) 234-5678',
+    });
+  });
+
+  it('maps LinkedIn and Greenhouse screening questions', () => {
+    const fields: ScannedField[] = [
+      {
+        fieldId: 'f_auth',
+        tag: 'input',
+        type: 'radio',
+        name: 'work_authorization',
+        label: 'Are you legally authorized to work in the United States?',
+        required: true,
+        visible: true,
+        domOrder: 1,
+      },
+      {
+        fieldId: 'f_visa',
+        tag: 'input',
+        type: 'radio',
+        name: 'visa_sponsorship',
+        label: 'Will you now or in the future require sponsorship for an employment visa?',
+        required: true,
+        visible: true,
+        domOrder: 2,
+      },
+      {
+        fieldId: 'f_li',
+        tag: 'input',
+        type: 'url',
+        name: 'urls[LinkedIn]',
+        label: 'LinkedIn Profile',
+        required: false,
+        visible: true,
+        domOrder: 3,
+      },
+    ];
+
+    const plan = defaultMapper.mapFields(fields, profile);
+
+    expect(plan.entries[0]).toMatchObject({
+      classification: 'work_authorization',
+      action: 'fill',
+      value: 'Yes',
+    });
+    expect(plan.entries[1]).toMatchObject({
+      classification: 'visa_sponsorship',
+      action: 'fill',
+      value: 'No',
+    });
+    expect(plan.entries[2]).toMatchObject({
+      classification: 'linkedin',
+      action: 'fill',
+      value: 'https://linkedin.com/in/sarthakgupta',
+    });
+  });
+});
