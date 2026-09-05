@@ -153,4 +153,20 @@ describe('DeterministicMapper', () => {
       { classification: 'unknown', action: 'skip' },
     ]);
   });
+
+  it('recognizes common site-specific names and autocomplete hints', () => {
+    const plan = defaultMapper.mapFields([
+      { fieldId: 'f1', tag: 'input', type: 'text', id: 'candidateFirstName', label: 'Given', required: false, visible: true, domOrder: 1 },
+      { fieldId: 'f2', tag: 'input', type: 'text', name: 'applicant_last_name', label: 'Family', required: false, visible: true, domOrder: 2 },
+      { fieldId: 'f3', tag: 'input', type: 'text', id: 'contactEmail', label: 'Contact', required: false, visible: true, domOrder: 3 },
+      { fieldId: 'f4', tag: 'input', type: 'text', autocomplete: 'family-name', label: 'Legal name', required: false, visible: true, domOrder: 4 },
+    ], profile);
+
+    expect(plan.entries).toMatchObject([
+      { classification: 'first_name', value: 'Sarthak' },
+      { classification: 'last_name', value: 'Gupta' },
+      { classification: 'email', value: 'sarthak@example.com' },
+      { classification: 'last_name', value: 'Gupta' },
+    ]);
+  });
 });

@@ -238,6 +238,7 @@ export interface ScannedField {
   name?: string;
   id?: string;
   placeholder?: string;
+  autocomplete?: string;
   ariaLabel?: string;
   label?: string;
   nearbyText?: string;

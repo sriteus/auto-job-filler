@@ -3,7 +3,6 @@
 import { FormEvent, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { DEFAULT_CANDIDATE_PROFILE } from '@ai-job-agent/shared';
 import type { CandidateProfile, CustomFieldEntry } from '@ai-job-agent/shared';
 import { useProfileStore } from '../../stores/profileStore';
 import { useAuth } from '../../context/AuthContext';
@@ -52,6 +51,28 @@ function valueOf(profile: CandidateProfile, key: string): string {
   return values[key] || '';
 }
 
+function emptyProfile(userId: string, email = ''): CandidateProfile {
+  const fact = <T,>(value: T) => ({ value, source: 'user_input' as const, verified: false });
+  return {
+    id: `profile-${userId}`,
+    userId,
+    personal: {
+      firstName: fact(''), lastName: fact(''), fullName: fact(''), email: fact(email),
+      phone: fact(''), address: fact(''), city: fact(''), state: fact(''), country: fact(''),
+      postalCode: fact(''), linkedin: fact(''), github: fact(''), portfolio: fact(''),
+    },
+    education: { entries: [{ id: 'education-1', university: fact(''), degree: fact(''), field: fact(''), startDate: fact(''), endDate: fact('') }] },
+    experience: { entries: [{ id: 'experience-1', company: fact(''), title: fact(''), startDate: fact(''), endDate: fact(''), description: fact(''), responsibilities: fact<string[]>([]), achievements: fact<string[]>([]), technologies: fact<string[]>([]) }] },
+    skills: { programmingLanguages: fact<string[]>([]), frameworks: fact<string[]>([]), databases: fact<string[]>([]), cloud: fact<string[]>([]), tools: fact<string[]>([]), other: fact<string[]>([]) },
+    projects: { entries: [] },
+    preferences: { desiredRoles: fact<string[]>([]), desiredLocations: fact<string[]>([]), remotePreference: fact('any'), relocationPreference: fact(false), salaryExpectations: fact(''), noticePeriod: fact('') },
+    applicationAnswers: { entries: [] },
+    customFields: [],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+}
+
 export default function ProfilePage() {
   const router = useRouter();
   const { profile, setProfile } = useProfileStore();
@@ -63,10 +84,10 @@ export default function ProfilePage() {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    const initial = profile || (DEFAULT_CANDIDATE_PROFILE as unknown as CandidateProfile);
+    const initial = profile || emptyProfile(user?.id || 'new-user', user?.email || '');
     setForm(Object.fromEntries(fields.map(([key]) => [key, valueOf(initial, key)])));
     setCustomFields(initial.customFields || []);
-  }, [profile]);
+  }, [profile, user]);
 
   useEffect(() => {
     if (!authLoading && supabase && !user) router.replace('/login');
@@ -81,7 +102,13 @@ export default function ProfilePage() {
       .maybeSingle()
       .then(({ data, error }) => {
         if (error) setMessage(error.message);
-        if (data?.profile) setProfile(data.profile as CandidateProfile);
+        if (data?.profile) {
+          setProfile(data.profile as CandidateProfile);
+        } else if (!error) {
+          const blank = emptyProfile(user.id, user.email || '');
+          setProfile(blank);
+          localStorage.removeItem('ai_job_agent_cached_profile');
+        }
       });
   }, [authLoading, user, setProfile]);
 
@@ -95,7 +122,7 @@ export default function ProfilePage() {
       router.replace('/login');
       return;
     }
-    const previous = profile || (DEFAULT_CANDIDATE_PROFILE as unknown as CandidateProfile);
+    const previous = profile || emptyProfile(user?.id || 'new-user', user?.email || '');
     const fact = <T,>(value: T) => ({
       value,
       source: 'user_input' as const,

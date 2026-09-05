@@ -13,8 +13,7 @@ export const supabase = supabaseConfigured
   : null;
 
 export async function signInAndLoadProfile(email: string, password: string) {
-  if (!supabase)
-      throw new Error('Profile sync is not configured for this extension build.');
+  if (!supabase) throw new Error('Profile sync is not configured for this extension build.');
   const { data: auth, error: authError } = await supabase.auth.signInWithPassword({
     email,
     password,

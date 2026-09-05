@@ -29,7 +29,29 @@ let currentTabId: number | null = null;
 let currentTabUrl: string = '';
 let scannedFields: ScannedField[] = [];
 let lastFillPlan: FillPlan | null = null;
-let candidateProfile: CandidateProfile = DEFAULT_CANDIDATE_PROFILE as CandidateProfile;
+
+function createEmptyProfile(): CandidateProfile {
+  const profile = structuredClone(DEFAULT_CANDIDATE_PROFILE) as CandidateProfile;
+  const clearFact = (fact: { value: unknown; verified: boolean }) => {
+    fact.value = Array.isArray(fact.value) ? [] : '';
+    fact.verified = false;
+  };
+  Object.values(profile.personal).forEach(clearFact);
+  profile.education.entries = [];
+  profile.experience.entries = [];
+  Object.values(profile.skills).forEach(clearFact);
+  profile.projects.entries = [];
+  Object.values(profile.preferences).forEach(clearFact);
+  profile.applicationAnswers.entries = [];
+  profile.customFields = [];
+  profile.id = 'extension-profile';
+  profile.userId = '';
+  profile.createdAt = new Date().toISOString();
+  profile.updatedAt = profile.createdAt;
+  return profile;
+}
+
+let candidateProfile: CandidateProfile = createEmptyProfile();
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
@@ -51,7 +73,7 @@ async function init() {
       'ai_job_agent_profile',
       'ai_job_agent_profile_id',
     ]);
-    if (stored.ai_job_agent_profile) {
+    if (!supabaseConfigured && stored.ai_job_agent_profile) {
       candidateProfile = stored.ai_job_agent_profile as CandidateProfile;
     }
   } catch (err) {

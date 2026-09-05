@@ -71,6 +71,7 @@ export class DeterministicMapper {
     const normalizedName = (field.name || '').toLowerCase();
     const normalizedId = (field.id || '').toLowerCase();
     const normalizedPlaceholder = (field.placeholder || '').toLowerCase();
+    const normalizedAutocomplete = (field.autocomplete || '').toLowerCase();
     const normalizedLabel = (field.label || '').toLowerCase();
     const normalizedAria = (field.ariaLabel || '').toLowerCase();
     const tag = field.tag.toLowerCase();
@@ -82,6 +83,7 @@ export class DeterministicMapper {
       normalizedName,
       normalizedId,
       normalizedPlaceholder,
+      normalizedAutocomplete,
       normalizedLabel,
       normalizedAria,
       type
@@ -126,12 +128,19 @@ export class DeterministicMapper {
     name: string,
     id: string,
     placeholder: string,
+    autocomplete: string,
     label: string,
     aria: string,
     type: string
   ): FieldClassificationType {
     const directTokens = [name, id, placeholder, label, aria];
     const tokens = [...directTokens, unifiedText];
+
+    if (autocomplete === 'given-name') return 'first_name';
+    if (autocomplete === 'family-name') return 'last_name';
+    if (autocomplete === 'name') return 'full_name';
+    if (autocomplete === 'email') return 'email';
+    if (autocomplete === 'tel' || autocomplete === 'tel-national') return 'phone';
 
     // Check HTML input types first
     if (type === 'email') return 'email';
@@ -143,9 +152,10 @@ export class DeterministicMapper {
     // First Name / Given Name
     if (
       this.matchesAny(directTokens, [
-        /^first[_\-\s]?name$/i,
+        /^(candidate|applicant|user|contact)?[_\-\s]?first[_\-\s]?name$/i,
+        /^(candidate|applicant)?[_\-\s]?(given|fore)[_\-\s]?name$/i,
         /^fname$/i,
-        /^given[_\-\s]?name$/i,
+        /^firstname$/i,
         /\bfirst\s*name\b/i,
         /\bgiven\s*name\b/i,
         /\bprénom\b/i,
@@ -157,8 +167,10 @@ export class DeterministicMapper {
     // Last Name / Surname / Family Name
     if (
       this.matchesAny(directTokens, [
-        /^last[_\-\s]?name$/i,
+        /^(candidate|applicant|user|contact)?[_\-\s]?last[_\-\s]?name$/i,
+        /^(candidate|applicant)?[_\-\s]?(family|sur)[_\-\s]?name$/i,
         /^lname$/i,
+        /^lastname$/i,
         /^surname$/i,
         /^family[_\-\s]?name$/i,
         /\blast\s*name\b/i,
@@ -189,6 +201,7 @@ export class DeterministicMapper {
     if (
       this.matchesAny(tokens, [
         /^email$/i,
+        /^(candidate|applicant|user|contact)?[_\-\s]?email( address)?$/i,
         /^e[_\-]?mail$/i,
         /^email[_\-\s]?address$/i,
         /\be-?mail\s*address\b/i,
@@ -201,6 +214,7 @@ export class DeterministicMapper {
     // Phone / Mobile
     if (
       this.matchesAny(tokens, [
+        /^(candidate|applicant|user|contact)?[_\-\s]?(phone|mobile|cell)([_\-\s]?number)?$/i,
         /^phone$/i,
         /^mobile$/i,
         /^cell$/i,

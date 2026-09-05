@@ -60,6 +60,7 @@ export class DOMScanner {
     const name = element.getAttribute('name') || undefined;
     const id = element.id || undefined;
     const placeholder = element.getAttribute('placeholder') || undefined;
+    const autocomplete = element.getAttribute('autocomplete') || undefined;
     const ariaLabel =
       element.getAttribute('aria-label') ||
       element.getAttribute('data-test-id') ||
@@ -84,6 +85,7 @@ export class DOMScanner {
       name,
       id,
       placeholder,
+      autocomplete,
       ariaLabel,
       label,
       nearbyText,
