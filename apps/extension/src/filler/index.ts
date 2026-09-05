@@ -314,9 +314,9 @@ export class FormFiller {
       return false;
     }
 
-    const radios = Array.from(
-      doc.querySelectorAll(`input[name="${name}"], [role="radio"][data-name="${name}"]`)
-    ) as HTMLElement[];
+    const radios = Array.from(doc.querySelectorAll<HTMLElement>('input[type="radio"], [role="radio"]')).filter(
+      (radio) => radio.getAttribute('name') === name || radio.getAttribute('data-name') === name
+    );
 
     for (const radio of radios) {
       const radioVal = (radio as HTMLInputElement).value?.toLowerCase()?.trim() || '';

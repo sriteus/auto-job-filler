@@ -57,14 +57,17 @@ export class DeterministicMapper {
 
     const customField = this.matchCustomField(field, profile);
     if (customField) {
+      const selectedValue = this.matchAvailableOption(field.options, customField.value);
+      const value = selectedValue || customField.value;
       return {
         fieldId: field.fieldId,
         classification: 'free_text',
-        action: customField.value ? 'fill' : 'skip',
-        value: customField.value,
+        action: value ? 'fill' : 'skip',
+        value,
         confidence: customField.verified ? 0.98 : 0.9,
         source: customField.verified ? 'verified_profile' : 'user_input',
         reasoning: `Matched custom profile field "${customField.label}"`,
+        options: field.options?.map((option) => ({ value: option, label: option })),
       };
     }
 
@@ -713,15 +716,36 @@ export class DeterministicMapper {
       .filter(Boolean)
       .map((token) => this.normalizeToken(token as string));
 
-    return customFields.find((customField) => {
-      const candidates = [customField.label, customField.key].map((value) =>
-        this.normalizeToken(value)
-      );
-      return candidates.some((candidate) =>
-        tokens.some(
-          (token) => token === candidate || token.includes(candidate) || candidate.includes(token)
-        )
-      );
+    return customFields
+      .map((customField) => ({
+        customField,
+        score: Math.max(
+          ...[customField.label, customField.key].map((candidate) =>
+            this.customFieldSimilarity(
+              this.normalizeToken(candidate),
+              tokens.filter((token) => token.length > 0)
+            )
+          )
+        ),
+      }))
+      .filter(({ score }) => score >= 0.45)
+      .sort((a, b) => b.score - a.score)[0]?.customField;
+  }
+
+  private customFieldSimilarity(candidate: string, tokens: string[]): number {
+    if (!candidate) return 0;
+    if (tokens.some((token) => token === candidate)) return 1;
+    if (tokens.some((token) => token.includes(candidate) || candidate.includes(token))) return 0.9;
+    if (candidate.includes('refer') && tokens.some((token) => token.includes('refer'))) return 0.62;
+    return Math.max(...tokens.map((token) => this.computeSimilarity(candidate, token)), 0);
+  }
+
+  private matchAvailableOption(options: string[] | undefined, value: string): string | undefined {
+    if (!options?.length || !value) return undefined;
+    const target = this.normalizeToken(value);
+    return options.find((option) => {
+      const normalized = this.normalizeToken(option);
+      return normalized === target || normalized.includes(target) || target.includes(normalized);
     });
   }
 
@@ -729,6 +753,7 @@ export class DeterministicMapper {
     return value
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, ' ')
+      .replace(/\b(referred|reffered|referral|referrer|referring)\b/g, 'refer')
       .trim();
   }
 

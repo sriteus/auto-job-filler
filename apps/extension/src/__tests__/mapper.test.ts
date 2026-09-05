@@ -169,4 +169,20 @@ describe('DeterministicMapper', () => {
       { classification: 'last_name', value: 'Gupta' },
     ]);
   });
+
+  it('maps a custom referral answer to a dropdown option', () => {
+    const customProfile = {
+      ...profile,
+      customFields: [{ id: 'referral', label: 'Was I referred', key: 'referral', value: 'No', verified: true }],
+    };
+    const plan = defaultMapper.mapFields([{
+      fieldId: 'f-referral', tag: 'select', type: 'select-one', name: 'referral_source',
+      label: 'Did someone refer you to apply for this job?', options: ['Yes', 'No'],
+      required: false, visible: true, domOrder: 1,
+    }], customProfile);
+
+    expect(plan.entries[0]).toMatchObject({
+      classification: 'free_text', action: 'fill', value: 'No',
+    });
+  });
 });
